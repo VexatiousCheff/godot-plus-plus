@@ -36,9 +36,9 @@ customs = [os.path.abspath(path) for path in customs]
 
 # Define GDExtension-specific options
 opts = Variables(customs, ARGUMENTS)
-opts.Add('source_dirs', 'List of source directories (comma-separated)', 'src')
-opts.Add('source_exts', 'List of source file extensions (comma-separated)', '.cpp,.c,.cc,.cxx')
-opts.Add('include_dirs', 'List of include directories (comma-separated)', 'include')
+opts.Add('source_dirs', 'List of source directories (comma-separated)', 'src') # Directory for source files
+opts.Add('source_exts', 'List of source file extensions (comma-separated)', '.cpp,.c,.cc,.cxx') 
+opts.Add('include_dirs', 'List of include directories (comma-separated)', 'src') # Directory for headers - some might want to create a separate include directory
 opts.Add('doc_output_dir', 'Directory for documentation output', 'gen')
 opts.Add('precision', 'Floating-point precision (single or double)', 'single')  # Default to single
 opts.Add('bundle_id_prefix', 'Bundle identifier prefix (reverse-DNS format)', 'com.gdextension')  # Default prefix
@@ -54,7 +54,7 @@ opts.Add(EnumVariable(
 # explicitly specify "enabled_classes" which disables all other classes.
 
 is_2d_profile_used = "false"
-is_3d_profile_used = "true"
+is_3d_profile_used = "false"
 is_custom_profile_used = "false"
 if is_2d_profile_used:
     env["build_profile"] = "2d_build_profile.json"

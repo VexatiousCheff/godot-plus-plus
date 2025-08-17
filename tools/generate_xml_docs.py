@@ -235,6 +235,7 @@ def main() -> None:
         if generate_docs(godot_executable):
             print(f"\nDone! Check the '{DOCS_OUTPUT_DIR}' folder and add custom documentation to the files!")
             print(f"Find out more here: {GODOT_DOCS_URL}")
+            print("\nAfter writing your custom documentation inside the files, you need to recompile again!")
     else:
         print("\nExiting. No Godot executable could be found or provided.")
 

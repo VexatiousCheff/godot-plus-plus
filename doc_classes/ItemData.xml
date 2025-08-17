@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ItemData" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		This is just a simple description!
+	</brief_description>
+	<description>
+		This is how you link to other classes [Node], [Object].
+		[b]This is bold text[/b]
+
+		For more information, check out the [url=https://docs.godotengine.org/en/stable/tutorials/plugins/editor/custom_editor_plugin.html]Official Documentation[/url].
+
+		Youtube Channel:
+		[url=https://www.youtube.com/@realnikich]@realNikich[/url]
+
+		Support more of my projects and tutorials here!
+		[url=https://ko-fi.com/realnikich]Ko-fi[/url]
+		[url=https://patreon.com/realnikich]Patreon[/url]
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="description" type="String" setter="set_description" getter="get_description" default="&quot;This is a default item description.&quot;">
+		</member>
+		<member name="name" type="String" setter="set_name" getter="get_name" default="&quot;Default Item&quot;">
+		</member>
+		<member name="price" type="int" setter="set_price" getter="get_price" default="0">
+		</member>
+	</members>
+</class>
