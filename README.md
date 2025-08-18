@@ -8,7 +8,7 @@ This repository provides a user-friendly template for developing [GDExtensions](
 - Anyone searching for how to boost your game's performance - making your games <b>SIGNIFICANTLY FASTER AND MORE OPTIMIZED</b>
 - Anyone that doesn't have multiple devices with different operating systems to test the plugin, but still wants everything he writes to be cross platform and to work for any architecture (x86_64, arm64 etc..)
 
-This template supports GitHub Actions - compiling for <b>Windows, macOS, Linux, Android, iOS, macOS and even Web builds</b>
+This template supports GitHub Actions - compiling for <b>Windows, macOS, Linux, Android, iOS, macOS and even Web</b>
 
 Compiles both <b>debug</b> as well as <b>final debug + release</b> builds when you are ready to publish your finished plugin to the [Godot Asset Library](https://godotengine.org/asset-library/asset) / [Itch.io](https://itch.io/) or anywhere else you might decide
 
@@ -19,6 +19,8 @@ Applies <b>LTO</b> for the final plugin release to <b>boost performance even fur
 <b>No complex setups and commands to remember, you just use `setup.py` and you are ready to write C++ GDExtension code for Godot Engine</b>
 
 <b>People just unzip your plugin and it works from the get go - again no hassle for the user, everything works out of the box!</b>
+
+As proof for the capabilities of this template, you can check out [BlastBullets2D](https://github.com/nikoladevelops/godot-blast-bullets-2d) - a fully finished 2D bullets plugin that uses C++ and boosts your game's performance, download the `test_project.zip` to see what it can do or even try forking it to compile and make changes to it yourself
 
 ## Requirements
 - [GitHub](https://github.com/) account because we are going to be using GitHub Actions for cross platform compilation
