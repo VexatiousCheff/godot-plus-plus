@@ -110,6 +110,17 @@ If everything went well, then every time you type a godot class (example : `Spri
 
 Note: I've excluded a lot of the files from the explorer that are unnecessary, but you can always unhide some of them by going inside `.vscode/settings.json` and modifying the values there from true to false
 
+
+Warning: If you are on Linux or macOS and see <b>any weird errors inside VS Code that don't make sense (like seeing detected errors on comments)</b>, but your code compiles perfectly fine, then please create a `.clangd` file inside your VS Code directory and paste this inside:
+
+```
+CompileFlags:
+  Add: -Wno-unknown-warning-option
+  Remove: [-m*, -f*]
+```
+
+Also, instead of VS Code, you could try using [Zed](https://zed.dev/), it is insanely fast and it works with Clangd by default
+
 ## Some advice
 1. Don't modify the godot-cpp classes, always make your own - you can choose to inherit from theirs or use pure C++ classes (pure classes won't be exposed to Godot)
 2. If you need source code of some classes, check [Godot Engine's source code](https://github.com/godotengine/godot)
