@@ -20,7 +20,7 @@ Applies <b>LTO</b> for the final plugin release to <b>boost performance even fur
 
 <b>People just unzip your plugin and it works from the get go - again no hassle for the user, everything works out of the box!</b>
 
-As proof for the capabilities of this template, you can check out [BlastBullets2D](https://github.com/nikoladevelops/godot-blast-bullets-2d) - a fully finished 2D bullets plugin that uses C++ and boosts your game's performance, download the `test_project.zip` to see what it can do or even try forking it to compile and make changes to it yourself
+As proof of the capabilities of this template, you can check out [BlastBullets2D](https://github.com/nikoladevelops/godot-blast-bullets-2d) - a fully finished 2D bullets plugin that uses C++ and boosts your game's performance, download the `test_project.zip` to see what it can do or even try forking it to compile and make changes to it yourself
 
 ## Requirements
 - [GitHub](https://github.com/) account because we are going to be using GitHub Actions for cross platform compilation
