@@ -256,11 +256,11 @@ jobs:
             cp "test_project/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.gdextension" "${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.gdextension"
           fi
 
-      # Copy LICENSE.md if it exists
-      - name: Copy LICENSE.md
+      # Copy LICENSE file if it exists
+      - name: Copy LICENSE
         run: |
-          if [ -f LICENSE.md ]; then
-            cp "LICENSE.md" "${{ env.PLUGIN_NAME }}/LICENSE.md"
+          if ls LICENSE* >/dev/null 2>&1; then
+            cp $(ls LICENSE* | head -n 1) "${{ env.PLUGIN_NAME }}/LICENSE"
           fi
 
       # List final structure
