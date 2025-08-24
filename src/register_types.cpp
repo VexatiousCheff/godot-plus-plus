@@ -15,7 +15,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	}
 
 	// Register your classes here, so they are available in the Godot editor and engine
-	GDREGISTER_CLASS(ItemData);
+	GDREGISTER_CLASS(ItemData)
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
