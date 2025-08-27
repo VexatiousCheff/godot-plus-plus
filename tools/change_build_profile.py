@@ -27,20 +27,17 @@ def write_file(file_path: str, content: str) -> None:
         print(f"Error: Could not write to {file_path}.")
         exit(1)
 
-def read_sconstruct_vars() -> Dict[str, str]:
+def read_sconstruct_vars() -> Dict[str, bool]:
     content = read_file(SCONSTRUCT_PATH)
     vars = {}
     required_vars = ["is_2d_profile_used", "is_3d_profile_used", "is_custom_profile_used"]
 
     for var in required_vars:
-        match = re.search(rf'^{var}\s*=\s*"([^"]+)"\s*$', content, re.MULTILINE)
+        match = re.search(rf'^{var}\s*=\s*(True|False)\s*$', content, re.MULTILINE)
         if not match:
-            print(f"Error: Variable '{var}' not found in {SCONSTRUCT_PATH}. Ensure it is defined as '{var} = \"true\"' or '{var} = \"false\"'.")
+            print(f"Error: Variable '{var}' not found in {SCONSTRUCT_PATH}. Ensure it is defined as '{var} = True' or '{var} = False'.")
             exit(1)
-        value = match.group(1).lower()
-        if value not in {"true", "false"}:
-            print(f"Error: Variable '{var}' has invalid value '{value}' in {SCONSTRUCT_PATH}. Must be 'true' or 'false'.")
-            exit(1)
+        value = match.group(1).lower() == "true"
         vars[var] = value
 
     return vars
@@ -66,13 +63,13 @@ def read_sconstruct_dirs() -> Tuple[List[str], List[str]]:
 
     return [d.strip() for d in source_dirs], [d.strip() for d in include_dirs]
 
-def update_sconstruct_vars(vars_to_set: Dict[str, str]) -> None:
+def update_sconstruct_vars(vars_to_set: Dict[str, bool]) -> None:
     content = read_file(SCONSTRUCT_PATH)
     new_content = content
 
     for var, value in vars_to_set.items():
-        pattern = rf'^{var}\s*=\s*"[^"]+"\s*$'
-        replacement = f'{var} = "{value}"'
+        pattern = rf'^{var}\s*=\s*(True|False)\s*$'
+        replacement = f'{var} = {str(value)}'
         if not re.search(pattern, new_content, re.MULTILINE):
             print(f"Error: Variable '{var}' not found in {SCONSTRUCT_PATH} for updating.")
             exit(1)
@@ -172,11 +169,6 @@ def classify_api() -> Tuple[Dict[str, Set[str]], int]:
             buckets["ui"].add(name)
 
     total_classes = len(api.get("classes", []))
-    # Debug: Verify bucket contents
-    # for key, classes in buckets.items():
-    #     print(f"DEBUG: Bucket '{key}' contains {len(classes)} classes: {sorted(classes)}")
-    # print(f"DEBUG: Total classes in extension_api.json: {total_classes}")
-
     return buckets, total_classes
 
 def find_used_classes(source_dirs: List[str], include_dirs: List[str]) -> Set[str]:
@@ -222,17 +214,17 @@ def generate_profile_json(file_name: str, disabled_classes: List[str]) -> None:
     }
     write_file(os.path.join(PARENT_DIR, file_name), json.dumps(profile, indent=4))
 
-def display_current_profile(vars: Dict[str, str]) -> None:
-    is_profile_used = any(vars[var] == "true" for var in vars)
+def display_current_profile(vars: Dict[str, bool]) -> None:
+    is_profile_used = any(vars[var] for var in vars)
     print(f"Build Profile Being Used: {str(is_profile_used).lower()}")
     print("Current Profile:")
     if not is_profile_used:
         print("  None (all classes included)")
-    elif vars["is_2d_profile_used"] == "true":
+    elif vars["is_2d_profile_used"]:
         print("  2D Profile")
-    elif vars["is_3d_profile_used"] == "true":
+    elif vars["is_3d_profile_used"]:
         print("  3D Profile")
-    elif vars["is_custom_profile_used"] == "true":
+    elif vars["is_custom_profile_used"]:
         print("  Custom User Profile")
 
 def get_user_choice() -> Tuple[str, Dict[str, bool]]:
@@ -261,11 +253,11 @@ def get_user_choice() -> Tuple[str, Dict[str, bool]]:
 
     return choice, extras
 
-def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[str, Set[str]], total_classes: int) -> Tuple[Dict[str, str], List[str], str]:
+def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[str, Set[str]], total_classes: int) -> Tuple[Dict[str, bool], List[str], str]:
     new_vars = {
-        "is_2d_profile_used": "false",
-        "is_3d_profile_used": "false",
-        "is_custom_profile_used": "false"
+        "is_2d_profile_used": False,
+        "is_3d_profile_used": False,
+        "is_custom_profile_used": False
     }
 
     disabled_classes: List[str] = []
@@ -276,7 +268,7 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
     if choice == "1":
         print("Profile set to None (all classes included).")
     elif choice == "2":
-        new_vars["is_2d_profile_used"] = "true"
+        new_vars["is_2d_profile_used"] = True
         disabled = set(buckets["3d"])
         for key, enabled in extras.items():
             if enabled:
@@ -285,7 +277,7 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
         profile_filename = "2d_build_profile.json"
         generate_profile_json(profile_filename, disabled_classes)
     elif choice == "3":
-        new_vars["is_3d_profile_used"] = "true"
+        new_vars["is_3d_profile_used"] = True
         disabled = set(buckets["2d"])
         for key, enabled in extras.items():
             if enabled:
@@ -294,7 +286,7 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
         profile_filename = "3d_build_profile.json"
         generate_profile_json(profile_filename, disabled_classes)
     elif choice == "4":
-        new_vars["is_custom_profile_used"] = "true"
+        new_vars["is_custom_profile_used"] = True
         profile_filename = "build_profile.json"
         profile_path = os.path.join(PARENT_DIR, profile_filename)
         auto_detect = input("\nShould I detect which classes you are using in your source files and header files and add them to your custom build profile automatically? (y/n): ").strip().lower() == "y"
@@ -357,15 +349,12 @@ def main():
 
     new_vars, disabled_classes, profile_filename = handle_profile_choice(choice, extras, buckets, total_classes)
 
-    # Only ensure the profile file for the selected choice
     if choice == "2":
         ensure_profile_exists("2d_build_profile.json", buckets)
     elif choice == "3":
         ensure_profile_exists("3d_build_profile.json", buckets)
     elif choice == "4":
-        # build_profile.json is already created in handle_profile_choice for choice 4
         pass
-    # For choice 1, no profile is needed, so skip ensure_profile_exists
 
     print("\nAll old object files will now be cleaned up, so you will have to recompile everything when this finishes.")
     clean_build_files()
