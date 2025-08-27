@@ -50,6 +50,10 @@ ${workspaceFolder}/src   -> usually where you write all your code
 
 
 ## How to use
+
+You can choose to watch this tutorial for beginners - https://www.youtube.com/watch?v=I79u5KNl34o
+##
+
 <b>THIS IS A TEMPLATE, DON'T CLONE THE REPOSITORY YET</b>
 
 1. To use this template, log in to GitHub and click the green <b>"Use this template"</b> button at the top of the repository page (not the clone button).
@@ -59,7 +63,7 @@ This will let you create a copy of this repository with a clean git history. Ple
 
 3. Modify the <b>`README.md`</b> file by clearing it and writing something useful about the code you're about to write
 
-4. <b>REPLACE THE `LICENSE.md` CONTENT</b> with the correct license that your plugin will be in. If you don't know which license to pick, just pick <b>MIT License</b>
+4. <b>REPLACE THE `LICENSE` CONTENT</b> with the correct license that your plugin will be in. If you don't know which license to pick, just pick <b>MIT License</b>
 
 5. Clone <b>your own repository</b> that you just made
 
@@ -106,7 +110,9 @@ Choose an option
 
 Warning: The first time you compile and the VS Code project is open, the Clangd extension will try to read and cache a lot of the information about your classes that were generated inside compile_commands.json by beginning to index them (you will actually notice that at the bottom left of your Visual Studio Code window). So before beginning to write code, please wait for everything to finish.
 
-If everything went well, then every time you type a godot class (example : `Sprite2D`), you should get intelisense as well as auto header includes. Please every time a header from godot-cpp is included, ensure it uses angle brackets - "<>" instead of double quotes.
+If everything went well, then every time you type a godot class (example : `Sprite2D`), you should get intelisense as well as auto header includes. 
+Usually header includes that come from an external library should be with angle brackets, but even if you leave the godot-cpp headers with double quotes, it's still fine so don't worry about it
+
 
 Note: I've excluded a lot of the files from the explorer that are unnecessary, but you can always unhide some of them by going inside `.vscode/settings.json` and modifying the values there from true to false
 
@@ -128,6 +134,7 @@ Also, instead of VS Code, you could try using [Zed](https://zed.dev/), it is ins
 4. Read the source code of `item_data.hpp` and `item_data.cpp` to understand how everything works - I've written lots of useful information as comments there, so whether you are a beginner or an advanced developer it will be insanely helpful to you
 5. When making brand new classes ensure you use `GDCLASS`, and `bind_methods()` and finally ensure you register the actual class inside `register_types.cpp` or else it won't be visible inside the editor
 6. Usually when you are writing C++ code, the `test_project` should be open - you write some C++ code, then compile and you repeat that over and over. Note that sometimes you might not see some of the changes, so you need to restart the Godot project <b>(Project -> Reload Current Project)</b>
+7. You can edit the ```.github/workflows/build-plugin.yml``` file and add or remove operating systems and architectures for which you want to compile your plugin
 
 ## Does My Plugin Work On Other Operating Systems?
 Right now every time you compile your code, it is being compiled for your own operating system and your own architecture, but since you want your plugin to be used by other people that might be on a different operating system (whether they are using the editor or trying to export their game with your plugin) we need to use GitHub Actions to test if everything is working correctly
@@ -135,20 +142,30 @@ Right now every time you compile your code, it is being compiled for your own op
 
 Every time you've added features to your plugin and you are wondering if it works for other operating systems you do this:
 
-1. Push your code to remote
+1. Commit and Push your code to remote
 2. Go to the GitHub Actions tab on your repository
-3. Run the "Build GDExtension Cross Platform Plugin" workflow by selecting that you want a `debug` build only - again first time compiling will be slow, but GitHub Actions also uses cache for Scons that lasts around 7 days, so it's fine. After everything is completed you will see a `finished_unzip_me` that contains a zip of your plugin. If everything is green, congrats your plugin works on all operating systems, if however you see red, it means that some of the builds failed and you need to play around and see why and fix your issues, then push to remote and try again.. repeat..
+3. Run the <b>"Build GDExtension Cross Platform Plugin"</b> workflow by selecting that you want a `debug` build only - again first time compiling will be slow, but GitHub Actions also uses cache for Scons that lasts around 7 days, so it's fine. After everything is completed you will see a `finished_unzip_me` that contains a zip of your plugin. If everything is green, congrats your plugin works on all operating systems, if however you see red, it means that some of the builds failed and you need to play around and see why and fix your issues, then push to remote and try again.. repeat..
+
+<b>Warning:</b> You should not use these builds as a plugin release.. they only test if everything is compiling correctly instead of wasting more resources for optimizations
 
 
 ## My C++ GDExtension Plugin Is Ready, I Want To Publish It
 If you compiled a debug build first, and you saw that everything is working and all your features are truly done, then you can go ahead and do your full plugin compilation that compiles `debug` builds used by the editor as well as `release` builds that are meant to be used by the exported game of the user.
 
-To do this, go inside your repository, then go to Actions tab, and then again run the "Build GDExtension Cross Platform Plugin" workflow, but this time from the dropdown instead of `debug`, you should choose `full_plugin_compilation`.
+To do this, go inside your repository, then go to Actions tab, and then again run the <b>"Build GDExtension Cross Platform Plugin"</b> workflow, but this time from the dropdown instead of `debug`, you should choose `full_plugin_compilation`.
 
-Again a `finished_unzip_me` that contains a zip of your plugin will be generated, but this time it includes both debug and release builds. All you have to do is unzip it, and then give the inner zip to someone or publish it somewhere so other people can use it.
+Again a `finished_unzip_me` that contains a zip of your plugin will be generated.
+
+1. Unzip it to get the actual zip for publishing
+2. Publish your plugin zip file as a release on your GitHub Repository / Godot Asset Library / Itch.io or give it to someone to test
 
 
-The only thing they need to do is to unzip the inner zip file to get the folder containing all builds then they should place the folder inside their project, no matter if they use an `addons` folder or they place it inside another folder or just in the root of the project, everything will work.
+## How Does Someone Download And Install The Plugin?
+
+1. Download the zip
+2. Unzip it inside a Godot project
+
+That's all! No matter if the user unzips it inside an "addon" folder or leaves it in the root directory or inside another folder, the plugin will still work.
 
 ## Support
 If you wish to support me you can do so here - https://ko-fi.com/realnikich or https://patreon.com/realnikich
