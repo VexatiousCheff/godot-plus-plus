@@ -173,7 +173,42 @@ def classify_api() -> Tuple[Dict[str, Set[str]], int]:
 
 def find_used_classes(source_dirs: List[str], include_dirs: List[str]) -> Set[str]:
     used = set()
-    dirs_to_scan = [os.path.join(PARENT_DIR, d) for d in source_dirs + include_dirs]
+    # Define additional directories to scan (excluding godot-cpp/gen)
+    additional_dirs = [
+        "godot-cpp/gdextension",
+        "godot-cpp/include",
+        "godot-cpp/src"
+    ]
+    dirs_to_scan = [os.path.join(PARENT_DIR, d) for d in source_dirs + include_dirs + additional_dirs]
+    
+    # Load all valid class names from the API
+    api_content = read_file(API_JSON_PATH)
+    api = json.loads(api_content)
+    valid_classes = {cls.get("name") for cls in api.get("classes", [])}
+
+    # Create filename_to_class map
+    filename_to_class: Dict[str, str] = {}
+    def pascal_to_snake(name: str) -> str:
+        s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
+        s2 = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1)
+        snake = s2.lower()
+        snake = re.sub(r'([a-z])([0-9])', r'\1_\2', snake)
+        snake = snake.replace('2_d', '2d').replace('3_d', '3d')
+        return snake
+
+    for cls in api.get("classes", []):
+        name = cls.get("name")
+        snake = pascal_to_snake(name)
+        filename_to_class[snake] = name
+        filename_to_class[name.lower()] = name  # Map lowercase class name directly
+        # Explicitly handle OS and other critical classes
+        if name in ['OS', 'ClassDB', 'Engine', 'ProjectSettings', 'Input', 'String', 'Variant']:
+            filename_to_class[name.lower()] = name
+
+    # Debug: Track scanned files and detected classes
+    scanned_files = []
+    detected_includes = []
+
     for dir_path in dirs_to_scan:
         if not os.path.exists(dir_path):
             continue
@@ -182,18 +217,38 @@ def find_used_classes(source_dirs: List[str], include_dirs: List[str]) -> Set[st
                 if not file.endswith(('.cpp', '.h', '.hpp')):
                     continue
                 path = os.path.join(root, file)
+                scanned_files.append(path)
                 content = read_file(path)
+                
+                # Check #include directives
                 for line in content.splitlines():
-                    if not line.strip().startswith('#include'):
-                        continue
-                    match = re.search(r'#include\s+["<](godot_cpp/classes/([^/]+)\.h(pp)?)[">]', line)
-                    if match:
-                        filename = match.group(2)
-                        if '_' in filename:
-                            class_name = ''.join(word.capitalize() for word in filename.split('_'))
-                        else:
-                            class_name = filename.capitalize()
+                    if line.strip().startswith('#include'):
+                        # Match classes in godot_cpp/(classes|core|variant)/
+                        match = re.search(r'#include\s+["<](godot_cpp/(classes|core|variant)/([^/]+)\.h(pp)?)[">]', line)
+                        if match:
+                            include_path = match.group(1)
+                            filename = match.group(3)
+                            class_name = filename_to_class.get(filename)
+                            if class_name and class_name in valid_classes:
+                                used.add(class_name)
+                                detected_includes.append((path, include_path, class_name))
+
+                # Check for class names used directly in code
+                for class_name in valid_classes:
+                    # Look for class name as a whole word, case-insensitive
+                    pattern = rf'\b{class_name}\b'
+                    if re.search(pattern, content, re.IGNORECASE):
                         used.add(class_name)
+
+    # Ensure critical utility classes are included if referenced
+    critical_classes = {'OS', 'ClassDB', 'Engine', 'ProjectSettings', 'Input', 'String', 'Variant'}
+    used.update(critical_classes & valid_classes & used)
+
+    # Debug: Print scanned files and detected includes
+    #print(f"Debug: Scanned {len(scanned_files)} files: {scanned_files}")
+    #print(f"Debug: Detected includes: {detected_includes}")
+    #print(f"Debug: Detected classes: {sorted(used)}")
+
     return used
 
 def get_all_ancestors(class_name: str, class_map: Dict[str, str]) -> Set[str]:
@@ -291,6 +346,7 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
         profile_path = os.path.join(PARENT_DIR, profile_filename)
         auto_detect = input("\nShould I detect which classes you are using in your source files and header files and add them to your custom build profile automatically? (y/n): ").strip().lower() == "y"
         if auto_detect:
+            print("This will take some time... please wait for generation to finish, don't close the window..")
             api_content = read_file(API_JSON_PATH)
             api = json.loads(api_content)
             class_map = _build_inheritance_map(api)
@@ -302,7 +358,7 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
             all_classes = set(class_map.keys())
             all_needed = all_needed & all_classes
             if not all_needed:
-                print("Warning: No Godot classes detected in your includes. Creating a default build_profile.json with minimal enabled classes.")
+                print("Warning: No Godot classes detected in your includes or code. Creating a default build_profile.json with minimal enabled classes.")
                 profile = {
                     "_": "Default build profile with minimal enabled classes. Edit this file to specify additional 'enabled_classes' or use 'disabled_classes'.",
                     "type": "feature_profile",
@@ -312,11 +368,12 @@ def handle_profile_choice(choice: str, extras: Dict[str, bool], buckets: Dict[st
                 print(f"Default build_profile.json created at {profile_path} with enabled_classes: {profile['enabled_classes']}. Edit it to specify additional classes.")
             else:
                 profile = {
-                    "_": "Auto-generated custom build profile based on detected classes from #include directives (including inheritance dependencies).",
+                    "_": "Auto-generated custom build profile based on detected classes from #include directives and code usage (including inheritance dependencies).",
                     "type": "feature_profile",
                     "enabled_classes": sorted(all_needed)
                 }
                 write_file(profile_path, json.dumps(profile, indent=4))
+                print("\n")
                 print(f"Custom Profile auto-generated: {len(all_needed)} classes enabled (including dependencies).")
                 print("Warning: If additional classes are needed (e.g., indirect uses), edit build_profile.json manually.")
         else:
@@ -371,7 +428,7 @@ def main():
         print(f"3D Profile enabled: {len(disabled_classes)} classes disabled out of {total_classes} total classes.")
         print("Warning: If you need some of the 2D or filtered classes that were disabled, you can always edit the 3d_build_profile.json and save your changes.")
     elif choice == "4":
-        print("Custom User Profile enabled: Edit build_profile.json to specify 'enabled_classes' or 'disabled_classes'.")
+        print("Custom User Profile enabled: You can edit build_profile.json to specify 'enabled_classes' or 'disabled_classes'.")
 
     print("SConstruct updated with new profile settings.")
     print("\nPlease recompile your project to apply the new build profile.")
