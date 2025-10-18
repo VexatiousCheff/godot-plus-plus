@@ -1,6 +1,7 @@
 {
   "explorer.autoReveal": false,
   "files.exclude": {
+    ".zed":true,
     "*.pdb":true,
     "src/**/*.o": true,
     "src/**/*.os": true,
@@ -91,5 +92,7 @@
     ".github":true,
     "godot-cpp":true,
     "setup.py":false
-}
+},
+  "files.eol": "\n",
+  "files.insertFinalNewline": true
 }
