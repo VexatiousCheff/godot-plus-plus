@@ -24,7 +24,7 @@ def find_sources(dirs, exts):
     return sources
 
 # Configuration
-libname = "plugin_name"
+libname = "opusgdextension"
 projectdir = "test_project"
 
 # Set up the environment
@@ -55,7 +55,7 @@ opts.Add(EnumVariable(
 
 is_2d_profile_used = False
 is_3d_profile_used = False
-is_custom_profile_used = True
+is_custom_profile_used = False
 if is_2d_profile_used:
     env["build_profile"] = "2d_build_profile.json"
 elif is_3d_profile_used:
@@ -88,8 +88,11 @@ doc_output_dir = env['doc_output_dir']        # Directory for documentation outp
 precision = env.get('precision', 'single')     # Ensure precision defaults to single
 bundle_id_prefix = env.get('bundle_id_prefix', 'com.gdextension')  # Ensure prefix defaults to com.gdextension
 
+include_dirs += ["src/", "src/opus/", "src/opus/celt/", "src/opus/silk/", "src/opus/silk/float/"]
+
 # Append include directories to CPPPATH
 env.Append(CPPPATH=include_dirs)
+env.Append(CPPDEFINES=[("OPUS_BUILD", 1), ("USE_ALLOCA", 1)])
 
 # Find all .cpp files recursively in the specified source directories
 sources = find_sources(source_dirs, source_exts)
