@@ -45,3 +45,21 @@ this can then be decoded relatively the same way from the chunks:
 	var decoded_data = opus_global_decoder.decode(data, FRAME_SIZE)
 	var vdata: PackedVector2Array = OpusLib.convert_unsigned_pcm(decoded_data)
 ```
+
+
+```
+OpusLib.str_error(err: int) -> String
+
+# can be used to convert AudioEffectCapture to opus-readable format (signed float to 16-bit)
+OpusLib.convert_signed_pcm(pcm: PackedVector2Array) -> PackedByteArray
+
+# can be used to convert back for use in an AudioStreamGenerator
+OpusLib.convert_unsigned_pcm(pcm: PackedByteArray) -> PackedVector2Array
+
+
+Opus**coder.setup(sample_rate: int, nchannels: int) -> int (err < 0)
+OpusEncoder.set_bitrate(bitrate: int) -> int (err < 0)
+
+OpusEncoder.encode(samples: PackedByteArray, frame_size: int, max_size: int) -> PackedByteArray (empty on error)
+OpusDecoder.decode(data: PackedByteArray, frame_size: int) -> PackedByteArray (empty on error)
+```
