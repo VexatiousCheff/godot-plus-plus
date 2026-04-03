@@ -19,7 +19,7 @@ OpusEncoder::~OpusEncoder() {
 void OpusEncoder::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("setup", "sample_rate", "channels"), &OpusEncoder::setup);
 	godot::ClassDB::bind_method(godot::D_METHOD("set_bitrate", "bitrate"), &OpusEncoder::set_bitrate);
-	godot::ClassDB::bind_method(godot::D_METHOD("encode", "pcm"), &OpusEncoder::encode);
+	godot::ClassDB::bind_method(godot::D_METHOD("encode", "pcm", "frame_size", "max_data_bytes"), &OpusEncoder::encode);
 }
 
 int OpusEncoder::setup(int sample_rate, int channels) {
